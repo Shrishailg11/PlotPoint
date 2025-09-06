@@ -1,8 +1,8 @@
 import React from 'react'
 
 function Profile() {
-    return 
-    <>
+    return <>
+    <h1>Profile</h1>
     </>
 }
 
