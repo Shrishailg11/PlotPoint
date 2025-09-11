@@ -1,6 +1,8 @@
 import express, { urlencoded } from 'express'
 import mongoose from 'mongoose'
 import dotenv from 'dotenv'
+import cors from 'cors'
+import cookieParser from 'cookie-parser';
 import userRouter from './routes/user.route.js'
 import authRouter from './routes/auth.router.js'
 
@@ -13,10 +15,13 @@ mongoose.connect(process.env.MONGO)
 const app = express()
 
 app.use(express.json());
+app.use(cookieParser());   
 app.use(express.urlencoded({ extended: true }));
 
-
-
+app.use(cors({
+    origin: 'http://localhost:5173',  
+    credentials: true
+  }));
 
 app.use('/api/user', userRouter);
 app.use('/api/auth', authRouter);

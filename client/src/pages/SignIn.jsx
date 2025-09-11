@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import {Link , useNavigate} from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux';
-import { signInStart,singInFailure, singInSuccess } from '../redux/user/userSlice.js';
+import { signInStart,signInFailure, signInSuccess } from '../redux/user/userSlice.js';
 import OAuth from '../components/OAuth.jsx';
 
 
@@ -31,14 +31,14 @@ function SignIn() {
         const data = await res.json();
         console.log(data);
         if(data.success === false){
-            dispatch(singInFailure(data.message));
+            dispatch(signInFailure(data.message));
             return ;
         }
-        dispatch(singInSuccess(data))
+        dispatch(signInSuccess(data))
         navigate('/');
         console.log("✅ Success:", data);
     } catch (err) {
-        dispatch(singInFailure(err.message))
+        dispatch(signInFailure(err.message))
     }
     };
 

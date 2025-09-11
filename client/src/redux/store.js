@@ -4,18 +4,22 @@ import {persistReducer} from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
 import { persistStore } from 'redux-persist'
 
-const rootReducer = combineReducers({user: userReducer})
-
-const persistConfig = {
-    key : 'root',
-    storage,
-    version :1
+// Create a specific persist config for user reducer
+const userPersistConfig = {
+  key: 'user',
+  storage,
+  blacklist: ['loading'] // Exclude loading from persistence
 }
 
-const persistedReducer = persistReducer(persistConfig, rootReducer);
- 
+// Apply persist config to user reducer
+const persistedUserReducer = persistReducer(userPersistConfig, userReducer)
+
+const rootReducer = combineReducers({
+  user: persistedUserReducer
+})
+
 export const store = configureStore({
-  reducer: persistedReducer,
+  reducer: rootReducer,
   middleware : (getDefaultMiddleware) => getDefaultMiddleware({
     serializableCheck :false,
   })
