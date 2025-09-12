@@ -1,11 +1,13 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect} from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { updateUserStart, updateUserSuccess, updateUserFailure } from '../redux/user/userSlice.js';
+import { updateUserStart, updateUserSuccess, updateUserFailure, signOut } from '../redux/user/userSlice.js';
 import { uploadToCloudinary } from '../utils/uploadToCloudinary.js';
 
 function Profile() {
   const { currentUser, loading, error } = useSelector((state) => state.user);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const fileRef = useRef(null);
   
 
@@ -112,9 +114,22 @@ function Profile() {
       if (!res.ok) {
         const errorMessage = data.message || `Server error: ${res.status}`;
         console.error('Update failed:', errorMessage);
+        
+        if(res.status === 401 || errorMessage.includes("Unauthorized")){
+          dispatch(signOut());
+          alert("Your session has expired, please sign in again");
+          navigate('/signin');
+          return;
+        }
+
         dispatch(updateUserFailure(errorMessage));
         return;
       }
+
+      
+
+
+
   
       // Now check for valid user data
       if (!data._id) {
