@@ -5,6 +5,7 @@ import { updateUserStart, updateUserSuccess, updateUserFailure, signOut,
   deleteUserStart, deleteUserSuccess, deleteUserFailure
  } from '../redux/user/userSlice.js';
 import { uploadToCloudinary } from '../utils/uploadToCloudinary.js';
+import { Link } from 'react-router-dom';
 
 function Profile() {
   const { currentUser, loading, error } = useSelector((state) => state.user);
@@ -294,6 +295,8 @@ function Profile() {
         >
           {loading ? 'Updating...' : 'Update'}
         </button>
+        <Link to="/create-listing" className="bg-green-600 p-3 rounded-lg text-white text-center uppercase hover:opacity-75 cursor-pointer">
+        Create Listing</Link>
       </form>
   
       <div className="flex justify-between mt-3 cursor-pointer">
