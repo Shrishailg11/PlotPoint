@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { uploadToCloudinary } from '../utils/uploadToCloudinary.js';
+import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 export default function CreateListing() {
     const [files, setFiles] = useState([])
@@ -21,6 +23,9 @@ export default function CreateListing() {
         parking: false,
         furnished: false,
     })
+
+    const navigate = useNavigate();
+    const { currentUser } = useSelector((state) => state.user);
 
     const handleChange = (e) => {
         if (e.target.id === 'sale' || e.target.id === 'rent') {
@@ -149,7 +154,7 @@ export default function CreateListing() {
                 },
                 body: JSON.stringify({
                     ...formData,
-                    userRef: 'currentUser._id', // This should come from Redux state
+                    userRef: currentUser._id, // Use the actual user ID
                 }),
                 credentials: 'include',
             });
@@ -162,8 +167,8 @@ export default function CreateListing() {
             }
 
             console.log('Listing created successfully:', data);
-            // Redirect to listing page or show success message
-            alert('Listing created successfully!');
+            // Redirect to the new listing page
+            navigate(`/listing/${data._id}`);
             
         } catch (error) {
             console.error('Create listing failed:', error);

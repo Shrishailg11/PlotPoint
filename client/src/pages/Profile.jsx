@@ -13,7 +13,6 @@ function Profile() {
   const navigate = useNavigate();
   const fileRef = useRef(null);
   
-
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -22,8 +21,11 @@ function Profile() {
   });
 
   const [uploading, setUploading] = useState(false);
+  const [userListings, setUserListings] = useState([]); // New state for user listings
+  const [showListingsError, setShowListingsError] = useState(false); // New state for listing error
+  const [showListings, setShowListings] = useState(false);
+  const [listingLoading, setListingLoading] = useState(false);
 
-  // Initialize formData when currentUser loads
   // Initialize formData when currentUser loads
   useEffect(() => {
   if (currentUser) {
@@ -128,11 +130,8 @@ function Profile() {
         dispatch(updateUserFailure(errorMessage));
         return;
       }
-
+  
       
-
-
-
   
       // Now check for valid user data
       if (!data._id) {
@@ -238,6 +237,46 @@ function Profile() {
     }
   };
 
+  // New function to handle showing user listings
+  const handleShowListings = async () => {
+    setShowListingsError(false);
+    setListingLoading(true);
+    setShowListings(true);
+    try {
+      const res = await fetch(`http://localhost:3000/api/listing/user-listings/${currentUser._id}`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to fetch listings');
+      setUserListings(data);
+    } catch (error) {
+      setShowListingsError(error.message || 'Error showing listings');
+      setUserListings([]);
+    } finally {
+      setListingLoading(false);
+    }
+  };
+
+  // New function to handle deleting a listing
+  const handleListingDelete = async (listingId) => {
+    if (!window.confirm('Are you sure you want to delete this listing?')) return;
+    try {
+      const res = await fetch(`/api/listing/delete/${listingId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to delete listing');
+      setUserListings((prev) => prev.filter((listing) => listing._id !== listingId));
+    } catch (error) {
+      alert(error.message || 'Error deleting listing');
+    }
+  };
+
+  const handleListingUpdate = (listingId) => {
+    navigate(`/update-listing/${listingId}`);
+  };
 
   return (
     <div className="max-w-lg mx-auto p-3">
@@ -305,6 +344,50 @@ function Profile() {
         <span onClick={handleSignOut} 
         className="text-red-600">Sign out</span>
       </div>
+      <button onClick={handleShowListings} 
+      className='mt-3 text-center items-center p-3 border rounded-lg bg-green-700 w-full text-white uppercase hover:opacity-95'
+      >Show My Listings</button>
+
+      {showListingsError && (
+        <p className="text-red-700 mt-5">{showListingsError}</p>
+      )}
+      {listingLoading && (
+        <p className="text-blue-700 mt-5">Loading your listings...</p>
+      )}
+
+      {showListings && !listingLoading && (
+        userListings.length > 0 ? (
+          <div className="flex flex-col gap-4">
+            <h1 className="text-center mt-7 text-2xl font-semibold">Your Listings</h1>
+            {userListings.map((listing) => (
+              <div key={listing._id} className="border rounded-lg p-3 flex justify-between items-center gap-4">
+                <Link to={`/listing/${listing._id}`}>
+                  <img src={listing.imageUrls[0]} alt="listing cover" className="h-16 w-16 object-contain" />
+                </Link>
+                <Link className="text-slate-700 font-semibold hover:underline truncate flex-1" to={`/listing/${listing._id}`}>
+                  <p>{listing.name}</p>
+                </Link>
+                <div className="flex flex-col item-center">
+                  <button
+                    onClick={() => handleListingDelete(listing._id)}
+                    className="text-red-700 uppercase"
+                  >
+                    Delete
+                  </button>
+                  <button
+                    onClick={() => handleListingUpdate(listing._id)}
+                    className="text-green-700 uppercase"
+                  >
+                    Edit
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-700 mt-5 text-center">You have not listed any properties yet.</p>
+        )
+      )}
     </div>
   );
 }
