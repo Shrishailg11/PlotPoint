@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { updateUserStart, updateUserSuccess, updateUserFailure, signOut } from '../redux/user/userSlice.js';
+import { updateUserStart, updateUserSuccess, updateUserFailure, signOut,
+  deleteUserStart, deleteUserSuccess, deleteUserFailure
+ } from '../redux/user/userSlice.js';
 import { uploadToCloudinary } from '../utils/uploadToCloudinary.js';
 
 function Profile() {
@@ -159,6 +161,59 @@ function Profile() {
     }
   };
 
+  const handleDeleteUser = async () => {
+    // Show confirmation dialog
+    const confirmDelete = window.confirm(
+      'Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently removed.'
+    );
+
+    if (!confirmDelete) {
+      return; // User cancelled the deletion
+    }
+
+    // Show second confirmation for extra safety
+    const finalConfirm = window.confirm(
+      'This is your final warning. Your account and all associated data will be permanently deleted. Are you absolutely sure?'
+    );
+
+    if (!finalConfirm) {
+      return; // User cancelled the deletion
+    }
+
+    dispatch(deleteUserStart());
+
+    try {
+      const res = await fetch(`http://localhost:3000/api/user/delete/${currentUser._id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        const errorMessage = data.message || `Server error: ${res.status}`;
+        console.error('Delete failed:', errorMessage);
+        dispatch(deleteUserFailure(errorMessage));
+        alert(`Failed to delete account: ${errorMessage}`);
+        return;
+      }
+
+      console.log('Account deleted successfully');
+      dispatch(deleteUserSuccess());
+      alert('Your account has been successfully deleted.');
+      
+      // Redirect to home page or sign-in page
+      navigate('/');
+
+    } catch (err) {
+      console.error('Delete error:', err);
+      const errorMessage = err.message || 'Network error occurred';
+      dispatch(deleteUserFailure(errorMessage));
+      alert(`Failed to delete account: ${errorMessage}`);
+    }
+  };
+
+
   return (
     <div className="max-w-lg mx-auto p-3">
       <h1 className="text-3xl font-semibold text-center my-3">Profile</h1>
@@ -218,7 +273,8 @@ function Profile() {
       </form>
   
       <div className="flex justify-between mt-3 cursor-pointer">
-        <span className="text-red-600">Delete account</span>
+        <span onClick={handleDeleteUser} 
+        className="text-red-600">Delete account</span>
         <span className="text-red-600">Sign out</span>
       </div>
     </div>

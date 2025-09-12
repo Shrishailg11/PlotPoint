@@ -84,3 +84,27 @@ export const updateUser = async (req, res, next) => {
     next(error);
   }
 };
+
+export const deleteUser = async (req, res, next) => {
+  if(!req.user || !req.params.id) return next(errorHandler(401, "Unauthorized to delete this account"))
+  
+  // compare strings - ensure user can only delete their own account
+  if (req.user.id.toString() !== req.params.id.toString()) {
+    return next(errorHandler(401, 'You can only delete your own account!'));
+  }
+  
+  try {
+    await User.findByIdAndDelete(req.params.id)
+    
+    // Clear the authentication cookie after successful deletion
+    res.clearCookie('access_token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // Use secure flag in production
+      sameSite: 'strict'
+    });
+    
+    res.status(200).json({message: "User deleted successfully"})
+  } catch (error) {
+    next(error);
+  }
+}
