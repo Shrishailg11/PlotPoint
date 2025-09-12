@@ -12,7 +12,7 @@ export const createListing = async (req, res, next) => {
 
 export const getListings = async (req, res, next) => {
   try {
-    const listings = await Listing.find({ userRef: req.params.id });
+    const listings = await Listing.find({ userRef: req.user.id });
     res.status(200).json(listings);
   } catch (error) {
     next(error);
@@ -32,7 +32,7 @@ export const getListing = async (req, res, next) => {
 };
 
 export const updateListing = async (req, res, next) => {
-  try {
+  
     const listing = await Listing.findById(req.params.id);
     if (!listing) {
       return res.status(404).json({ message: 'Listing not found' });
@@ -41,7 +41,8 @@ export const updateListing = async (req, res, next) => {
     if (listing.userRef !== req.user.id) {
       return res.status(401).json({ message: 'You can only update your own listings' });
     }
-
+    
+    try {
     const updatedListing = await Listing.findByIdAndUpdate(
       req.params.id,
       req.body,
@@ -54,7 +55,7 @@ export const updateListing = async (req, res, next) => {
 };
 
 export const deleteListing = async (req, res, next) => {
-  try {
+  
     const listing = await Listing.findById(req.params.id);
     if (!listing) {
       return res.status(404).json({ message: 'Listing not found' });
@@ -64,6 +65,8 @@ export const deleteListing = async (req, res, next) => {
       return res.status(401).json({ message: 'You can only delete your own listings' });
     }
 
+    try {
+      
     await Listing.findByIdAndDelete(req.params.id);
     res.status(200).json({ message: 'Listing deleted successfully' });
   } catch (error) {

@@ -1,11 +1,13 @@
-import { useState } from "react";
-import { uploadToCloudinary } from '../utils/uploadToCloudinary.js';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from "react";
 import { useSelector } from 'react-redux';
+import { useParams, useNavigate } from 'react-router-dom';
+import { uploadToCloudinary } from '../utils/uploadToCloudinary.js';
 
-export default function CreateListing() {
+export default function UpdateListing() {
     const { currentUser } = useSelector((state) => state.user);
-
+    const { listingId } = useParams();
+    const navigate = useNavigate();
+    
     const [files, setFiles] = useState([])
     const [uploading, setUploading] = useState(false)
     const [loading, setLoading] = useState(false)
@@ -26,8 +28,22 @@ export default function CreateListing() {
         furnished: false,
     })
 
-    const navigate = useNavigate();
-    
+    useEffect(() => {
+        const fetchListing = async () => {
+            try {
+                const res = await fetch(`http://localhost:3000/api/listing/get/${listingId}`);
+                const data = await res.json();
+                if (data.success === false) {
+                    setError(data.message);
+                    return;
+                }
+                setFormData(data);
+            } catch (error) {
+                setError('Failed to fetch listing');
+            }
+        };
+        fetchListing();
+    }, [listingId]);
 
     const handleChange = (e) => {
         if (e.target.id === 'sale' || e.target.id === 'rent') {
@@ -127,63 +143,63 @@ export default function CreateListing() {
     }
 
     const handleSubmit = async (e) => {
-      e.preventDefault();
-      
-      // Validation
-      if (formData.imageUrls.length === 0) {
-          setError('Please upload at least one image');
-          return;
-      }
-      
-      if (formData.imageUrls.length > 6) {
-          setError('Maximum 6 images allowed');
-          return;
-      }
+        e.preventDefault();
+        
+        // Validation
+        if (formData.imageUrls.length === 0) {
+            setError('Please upload at least one image');
+            return;
+        }
+        
+        if (formData.imageUrls.length > 6) {
+            setError('Maximum 6 images allowed');
+            return;
+        }
 
-      if (formData.regularPrice < formData.discountPrice) {
-          setError('Discounted price cannot be higher than regular price');
-          return;
-      }
+        if (formData.regularPrice < formData.discountPrice) {
+            setError('Discounted price cannot be higher than regular price');
+            return;
+        }
 
-      setLoading(true);
-      setError(false);
+        setLoading(true);
+        setError(false);
 
-      try {
-          const res = await fetch('http://localhost:3000/api/listing/create', {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                  ...formData,
-                  userRef: currentUser._id, // Use the actual user ID from Redux
-              }),
-              credentials: 'include',
-          });
+        try {
+            const res = await fetch(`http://localhost:3000/api/listing/update/${listingId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    ...formData,
+                    userRef: currentUser._id,
+                }),
+                credentials: 'include',
+            });
 
-          const data = await res.json();
+            const data = await res.json();
 
-          if (!res.ok) {
-              setError(data.message || 'Failed to create listing');
-              return;
-          }
+            if (!res.ok) {
+                setError(data.message || 'Failed to update listing');
+                return;
+            }
 
-          console.log('Listing created successfully:', data);
-          // Redirect to listing page or show success message
-          alert('Listing created successfully!');
-          
-      } catch (error) {
-          console.error('Create listing failed:', error);
-          setError('Failed to create listing. Please try again.');
-      } finally {
-          setLoading(false);
-      }
-  }
+            console.log('Listing updated successfully:', data);
+            alert('Listing updated successfully!');
+            navigate(`/listing/${listingId}`);
+            
+        } catch (error) {
+            console.error('Update listing failed:', error);
+            setError('Failed to update listing. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    }
 
     return (
         <main className='p-3 max-w-4xl mx-auto'>
           <h1 className='text-3xl font-semibold text-center my-7'>
-            Create a Listing
+            Update Listing
           </h1>
           <form onSubmit={handleSubmit} className='flex flex-col sm:flex-row gap-4'>
             <div className='flex flex-col gap-4 flex-1'>
@@ -402,7 +418,7 @@ export default function CreateListing() {
                 disabled={loading || uploading}
                 className='p-3 bg-slate-700 text-white rounded-lg uppercase hover:opacity-95 disabled:opacity-80'
               >
-                {loading ? 'Creating...' : 'Create listing'}
+                {loading ? 'Updating...' : 'Update listing'}
               </button>
               {error && <p className='text-red-700 text-sm'>{error}</p>}
             </div>
