@@ -213,6 +213,30 @@ function Profile() {
     }
   };
 
+  const handleSignOut = async () => {
+    try {
+      // Call backend to clear the cookie
+      const res = await fetch('/api/auth/signout', {
+        method: 'GET',
+        credentials: 'include',
+      });
+
+      if (!res.ok) {
+        console.error('Sign out failed on server');
+      }
+
+      // Clear Redux state regardless of server response
+      dispatch(signOut());
+      navigate('/');
+      
+    } catch (error) {
+      console.error('Sign out error:', error);
+      // Still clear Redux state even if server call fails
+      dispatch(signOut());
+      navigate('/');
+    }
+  };
+
 
   return (
     <div className="max-w-lg mx-auto p-3">
@@ -275,7 +299,8 @@ function Profile() {
       <div className="flex justify-between mt-3 cursor-pointer">
         <span onClick={handleDeleteUser} 
         className="text-red-600">Delete account</span>
-        <span className="text-red-600">Sign out</span>
+        <span onClick={handleSignOut} 
+        className="text-red-600">Sign out</span>
       </div>
     </div>
   );
