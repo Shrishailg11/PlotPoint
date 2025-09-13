@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 
 export default function Contact({ listing }) {
   const [landlord, setLandlord] = useState(null);
@@ -20,6 +19,22 @@ export default function Contact({ listing }) {
     };
     fetchLandlord();
   }, [listing.userRef]);
+
+  const handleSendMessage = () => {
+    if (!message.trim()) {
+      alert('Please enter a message before sending.');
+      return;
+    }
+
+    // Create Gmail compose URL with pre-filled fields
+    const subject = encodeURIComponent(`Regarding ${listing.name}`);
+    const body = encodeURIComponent(message);
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${landlord.email}&su=${subject}&body=${body}`;
+    
+    // Open Gmail compose in new window/tab
+    window.open(gmailUrl, '_blank');
+  };
+
   return (
     <>
       {landlord && (
@@ -39,12 +54,20 @@ export default function Contact({ listing }) {
             className='w-full border p-3 rounded-lg'
           ></textarea>
 
-          <Link
-          to={`mailto:${landlord.email}?subject=Regarding ${listing.name}&body=${message}`}
-          className='bg-slate-700 text-white text-center p-3 uppercase rounded-lg hover:opacity-95'
+          <button
+            onClick={handleSendMessage}
+            className='bg-slate-700 text-white text-center p-3 uppercase rounded-lg hover:opacity-95'
           >
-            Send Message          
-          </Link>
+            Send Message
+          </button>
+          
+          {/* Alternative: Traditional mailto link as fallback */}
+          <a
+            href={`mailto:${landlord.email}?subject=Regarding ${listing.name}&body=${encodeURIComponent(message)}`}
+            className='text-blue-600 text-sm text-center hover:underline'
+          >
+            Or use default email client
+          </a>
         </div>
       )}
     </>
