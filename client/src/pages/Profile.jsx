@@ -237,26 +237,26 @@ function Profile() {
     }
   };
 
-  // New function to handle showing user listings
-  const handleShowListings = async () => {
-    setShowListingsError(false);
-    setListingLoading(true);
-    setShowListings(true);
-    try {
-      const res = await fetch(`http://localhost:3000/api/listing/get`, {
-        method: 'GET',
-        credentials: 'include',
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Failed to fetch listings');
-      setUserListings(data);
-    } catch (error) {
-      setShowListingsError(error.message || 'Error showing listings');
-      setUserListings([]);
-    } finally {
-      setListingLoading(false);
-    }
-  };
+ // New function to handle showing user listings
+ const handleShowListings = async () => {
+  setShowListingsError(false);
+  setListingLoading(true);
+  setShowListings(true);
+  try {
+    const res = await fetch(`http://localhost:3000/api/listing/get?userId=${currentUser._id}`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Failed to fetch listings');
+    setUserListings(data);
+  } catch (error) {
+    setShowListingsError(error.message || 'Error showing listings');
+    setUserListings([]);
+  } finally {
+    setListingLoading(false);
+  }
+};
 
   // New function to handle deleting a listing
   const handleListingDelete = async (listingId) => {

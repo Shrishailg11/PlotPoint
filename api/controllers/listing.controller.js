@@ -44,12 +44,16 @@ export const createListing = async (req, res, next) => {
   
       const order = req.query.order || 'desc';
   
+      // Add userRef filter if userId is provided
+      const userRef = req.query.userId || null;
+  
       const listings = await Listing.find({
         name: { $regex: searchTerm, $options: 'i' },
         offer,
         furnished,
         parking,
         type,
+        ...(userRef && { userRef }), // Only filter by userRef if userId is provided
       })
         .sort({ [sort]: order })
         .limit(limit)
