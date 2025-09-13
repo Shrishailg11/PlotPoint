@@ -48,7 +48,13 @@ export const createListing = async (req, res, next) => {
       const userRef = req.query.userId || null;
   
       const listings = await Listing.find({
-        name: { $regex: searchTerm, $options: 'i' },
+        ...(searchTerm && {
+          $or: [
+            { name: { $regex: searchTerm, $options: 'i' } },
+            { description: { $regex: searchTerm, $options: 'i' } },
+            { address: { $regex: searchTerm, $options: 'i' } },
+          ]
+        }),
         offer,
         furnished,
         parking,
