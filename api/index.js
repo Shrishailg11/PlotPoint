@@ -24,7 +24,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(cors({
     origin: process.env.NODE_ENV === 'production' 
-        ? 'https://your-app-name.onrender.com'  // Replace with your actual Render URL
+        ? true  // Allow any origin in production (Render will handle security)
         : 'http://localhost:5173',  
     credentials: true
 }));
