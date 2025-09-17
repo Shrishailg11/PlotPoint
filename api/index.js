@@ -8,6 +8,8 @@ import authRouter from './routes/auth.router.js'
 import listingRouter from './routes/listing.router.js'
 import path from 'path'
 
+const PORT = process.env.PORT || 3000;
+
 dotenv.config()
 
 mongoose.connect(process.env.MONGO)
@@ -50,6 +52,8 @@ app.use((err,req,res,next)=>{
     })
 })
 
-app.listen(3000, ()=>{
-    console.log("Server is running at PORT 3000!!");
-})
+
+
+app.listen(PORT, () => {
+    console.log(`Server is running at PORT ${PORT}!!`);
+});
