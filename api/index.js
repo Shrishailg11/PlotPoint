@@ -37,8 +37,19 @@ app.use('/api/listing', listingRouter);
 
 app.use(express.static(path.join(__dirname,'/client/dist')));
 
-app.use('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
+// Replace the entire catch-all section with this
+app.get('/*', (req, res, next) => {
+    // Skip API routes
+    if (req.path.startsWith('/api/')) {
+      return next();
+    }
+    
+    // Serve React app for all other routes
+    res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'), (err) => {
+      if (err) {
+        res.status(500).send('Error loading the application');
+      }
+    });
   });
 
 
