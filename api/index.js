@@ -37,19 +37,13 @@ app.use('/api/listing', listingRouter);
 
 app.use(express.static(path.join(__dirname,'/client/dist')));
 
-// Replace the entire catch-all section with this
-app.get('/*', (req, res, next) => {
-    // Skip API routes
-    if (req.path.startsWith('/api/')) {
-      return next();
-    }
-    
-    // Serve React app for all other routes
-    res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'), (err) => {
-      if (err) {
-        res.status(500).send('Error loading the application');
-      }
-    });
+
+// Remove all catch-all routes and use a simple approach
+// The static middleware will handle most routes automatically
+// Add this only if needed for specific routes
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
   });
 
 
