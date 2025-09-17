@@ -23,9 +23,11 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(cors({
-    origin: 'http://localhost:5173',  
+    origin: process.env.NODE_ENV === 'production' 
+        ? 'https://your-app-name.onrender.com'  // Replace with your actual Render URL
+        : 'http://localhost:5173',  
     credentials: true
-  }));
+}));
 
 app.use('/api/user', userRouter);
 app.use('/api/auth', authRouter);
